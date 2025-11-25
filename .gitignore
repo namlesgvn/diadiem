@@ -1,0 +1,13 @@
+# Môi trường ảo
+venv/
+*.pyc
+
+# Database cục bộ
+db.sqlite3
+
+# File cấu hình bí mật (CHỨA KEY API)
+.env
+
+# File tĩnh và media cục bộ
+/staticfiles/
+/media/

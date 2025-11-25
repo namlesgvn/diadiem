@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bản đồ Địa Danh Lịch Sử & Thiên Nhiên</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+       crossorigin=""/>
+       
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+       crossorigin=""></script>
+       
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #map { 
+            height: 600px; /* Chiều cao cố định cho bản đồ */
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .popup-image {
+            max-width: 100px; 
+            height: auto;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🗺️ Bản đồ Địa Danh Lịch Sử & Thiên Nhiên</h1>
+        
+        <div id="map"></div> </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var mapContainer = document.getElementById('map');
+            if (!mapContainer) {
+                console.error("Lỗi: Không tìm thấy container bản đồ với ID 'map'.");
+                return;
+            }
+            
+            // Khởi tạo Bản đồ Leaflet
+            var map = L.map('map').setView([16.0, 108.0], 6); 
+
+            // Thêm Tile Layer (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+            }).addTo(map);
+
+            // Gọi API để lấy dữ liệu tọa độ từ Django
+            fetch('/api/locations/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        console.warn("API trả về dữ liệu rỗng. Không có địa điểm nào để hiển thị.");
+                    }
+                    data.forEach(diadiem => {
+                        if (diadiem.vido && diadiem.kinhdo) {
+                            
+                            const imageUrl = diadiem.hinh_anh_dai_dien ? diadiem.hinh_anh_dai_dien : '';
+                            
+                            // Xây dựng nội dung Popup
+                            const popupContent = `
+                                <h4>${diadiem.ten}</h4>
+                                <p><b>Phân loại:</b> ${diadiem.loai}</p>
+                                ${imageUrl ? `<img src="${imageUrl}" class="popup-image">` : ''}<br>
+                                <a href="/diadiem/${diadiem.id}">Xem chi tiết</a>
+                            `;
+                            
+                            // Thêm Marker (đánh dấu)
+                            L.marker([diadiem.vido, diadiem.kinhdo])
+                                .addTo(map)
+                                .bindPopup(popupContent);
+                        }
+                    });
+                })
+                .catch(error => console.error('Lỗi khi tải dữ liệu địa điểm:', error));
+        }); 
+    </script>
+</body>
+</html>

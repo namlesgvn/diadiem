@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ diadiem.ten }}</title>
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <style>
+        .container {
+            margin-top: 30px;
+        }
+        .detail-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="btn btn-secondary mb-4">← Quay lại Bản đồ</a>
+        
+        <h1 class="mb-4 text-primary">{{ diadiem.ten }}</h1>
+        
+        <div class="row">
+            <div class="col-md-8">
+                {% if diadiem.hinh_anh_dai_dien %}
+                    <img src="{{ diadiem.hinh_anh_dai_dien.url }}" alt="{{ diadiem.ten }}" class="detail-image">
+                {% endif %}
+                
+                <h2>Mô tả Chi tiết</h2>
+                <p class="lead">{{ diadiem.mo_ta|linebreaks }}</p>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        Thông tin Cơ bản
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><b>Phân loại:</b> {{ diadiem.get_loai_display }}</li>
+                        <li class="list-group-item"><b>Vĩ độ:</b> {{ diadiem.vido|default:"Không có" }}</li>
+                        <li class="list-group-item"><b>Kinh độ:</b> {{ diadiem.kinhdo|default:"Không có" }}</li>
+                        <li class="list-group-item"><b>Cập nhật:</b> {{ diadiem.ngay_cap_nhat|date:"d/m/Y H:i" }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
