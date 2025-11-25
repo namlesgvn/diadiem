@@ -25,7 +25,9 @@ else:
     # Lấy tên miền từ biến môi trường WEB_HOST (ví dụ: diadanh-1.onrender.com)
     ALLOWED_HOSTS = [
         config('WEB_HOST', default=''), # Tên miền chính thức của Render
-        '.onrender.com',               # Cho phép các sub-domain của Render (an toàn hơn)
+        '.onrender.com',               # Cho phép các sub-domain của Render (antoàn hơn)
+        'lenamvn.com',              # Tên miền gốc của bạn
+        'www.lenamvn.com',          # Tên miền có www của bạn
     ]
 
 # Application definition
