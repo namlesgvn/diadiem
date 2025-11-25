@@ -19,16 +19,27 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-j6%i9e*s_0(f=e2g1g5(x
 DEBUG = config('DEBUG', default=False, cast=bool) 
 
 # Cấu hình ALLOWED_HOSTS cho môi trường Production (Render)
+# ProjectDiaDanh/settings.py
+
+# ... (Tìm và sửa khối này) ...
+
+# Đọc DEBUG từ biến môi trường. Mặc định là False khi deploy.
+DEBUG = config('DEBUG', default=False, cast=bool) 
+
 if DEBUG:
-    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*'] # Cho phép tất cả khi dev
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']
 else:
-    # Lấy tên miền từ biến môi trường WEB_HOST (ví dụ: diadanh-1.onrender.com)
+    # --- THAY 'TEN_MIEN_CUA_BAN.com' BẰNG TÊN MIỀN CỦA BẠN ---
+    CUSTOM_DOMAIN = 'lenamvn.com'
+    
     ALLOWED_HOSTS = [
-        config('WEB_HOST', default=''), # Tên miền chính thức của Render
-        '.onrender.com',               # Cho phép các sub-domain của Render (antoàn hơn)
-        'lenamvn.com',              # Tên miền gốc của bạn
-        'www.lenamvn.com',          # Tên miền có www của bạn
+        config('WEB_HOST', default=''), # Tên miền Render (diadiem-1.onrender.com)
+        '.onrender.com',               # Cho phép các sub-domain của Render
+        CUSTOM_DOMAIN,                 # Tên miền gốc (ví dụ: mydiadiem.com)
+        f'www.{CUSTOM_DOMAIN}',        # Tên miền có www (ví dụ: www.mydiadiem.com)
     ]
+    
+# ...
 
 # Application definition
 
