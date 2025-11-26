@@ -16,7 +16,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-       
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -66,7 +69,18 @@
             }
             
             // Khởi tạo Bản đồ Leaflet
-            var map = L.map('map').setView([16.0, 108.0], 6); 
+            var map = L.map('map').setView([16.0, 108.0], 6);
+
+            // --- THÊM MỚI: Nút Vị trí của tôi ---
+            L.control.locate({
+                position: 'topleft',  // Vị trí nút (góc trên trái)
+                strings: {
+                    title: "Cho tôi biết tôi đang ở đâu" // Chú thích khi rê chuột vào
+                },
+                locateOptions: {
+                    enableHighAccuracy: true // Cố gắng lấy vị trí chính xác nhất (GPS)
+                }
+            }).addTo(map);
 
             // Thêm Tile Layer (OpenStreetMap)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
