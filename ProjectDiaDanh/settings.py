@@ -141,21 +141,42 @@ USE_TZ = True
 # 1. Cấu hình Static files (CSS, JS)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles' # Nơi WhiteNoise thu thập Static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # Cấu hình WhiteNoise
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # Cấu hình WhiteNoise
 
 # 2. Cấu hình Media files (Hình ảnh)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # 3. Cấu hình Cloudinary
+# CLOUDINARY_STORAGE = {
+#    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+#    'API_KEY': config('CLOUDINARY_API_KEY'),
+#    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+# ==============================================================================
+# CẤU HÌNH STORAGE CHO DJANGO 5.x (BẮT BUỘC)
+# ==============================================================================
+
+# Đảm bảo thư viện Cloudinary đã được import cấu hình
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': config('CLOUDINARY_API_KEY'),
     'API_SECRET': config('CLOUDINARY_API_SECRET'),
 }
 
+# Cấu hình STORAGES mới thay thế cho DEFAULT_FILE_STORAGE cũ
+STORAGES = {
+    # 1. Quản lý Media (Ảnh upload lên Cloudinary)
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    # 2. Quản lý Static files (CSS/JS dùng WhiteNoise)
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 # Đặt Cloudinary làm nơi lưu trữ mặc định cho MEDIA (files upload)
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
