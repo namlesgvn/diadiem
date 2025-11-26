@@ -6,128 +6,176 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bản đồ Địa Danh Lịch Sử & Thiên Nhiên</title>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-       crossorigin=""/>
-       
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-       crossorigin=""></script>
-
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
-    
+       
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        #map { 
-            height: 600px; /* Chiều cao cố định cho bản đồ */
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        
+        /* Container chính */
+        .main-container {
+            position: relative; /* Để đặt các thành phần con tuyệt đối */
+            height: 100vh; /* Full màn hình */
             width: 100%;
-            border: 1px solid #ccc;
-            border-radius: 8px;
         }
+
+        #map { height: 100%; width: 100%; z-index: 1; }
+
+        /* --- THANH CÔNG CỤ TÌM KIẾM & LỌC (Nổi trên bản đồ) --- */
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000; /* Cao hơn bản đồ để click được */
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            width: 300px;
+            max-width: 90%;
+        }
+
+        .control-group { margin-bottom: 10px; }
+        .control-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px;}
+        
+        /* Style cho Input và Select */
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Đảm bảo padding không làm vỡ khung */
+        }
+
         .popup-image {
-            max-width: 100px; 
-            height: auto;
-            margin-top: 5px;
+            width: 100%; 
+            height: 150px; 
+            object-fit: cover; 
+            margin-top: 5px; 
             border-radius: 4px;
         }
+        .popup-content { min-width: 200px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>🗺️ Bản đồ Địa Danh Lịch Sử & Thiên Nhiên</h1>
+    <div class="main-container">
         
-        <div id="map"></div> </div>
+        <div class="map-controls">
+            <h3 style="margin-top: 0; text-align: center;">🔍 Tìm kiếm & Lọc</h3>
+            
+            <div class="control-group">
+                <input type="text" id="search-input" class="form-control" placeholder="Nhập tên địa điểm...">
+            </div>
+
+            <div class="control-group">
+                <select id="type-filter" class="form-control">
+                    <option value="all">-- Tất cả các loại --</option>
+                    <option value="LS">Di tích Lịch Sử</option>
+                    <option value="VH">Văn Hóa</option>
+                    <option value="TN">Thiên Nhiên</option>
+                </select>
+            </div>
+            
+            <div style="text-align: center; font-size: 12px; color: #666;">
+                Tìm thấy: <span id="count-result" style="font-weight: bold;">0</span> địa điểm
+            </div>
+        </div>
+
+        <div id="map"></div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var mapContainer = document.getElementById('map');
-            if (!mapContainer) {
-                console.error("Lỗi: Không tìm thấy container bản đồ với ID 'map'.");
-                return;
-            }
             
-            // Khởi tạo Bản đồ Leaflet
-            var map = L.map('map').setView([16.0, 108.0], 6);
+            // 1. Khởi tạo Bản đồ
+            var map = L.map('map').setView([16.0, 108.0], 6); 
 
-            // --- THÊM MỚI: Nút Vị trí của tôi ---
-            L.control.locate({
-                position: 'topleft',  // Vị trí nút (góc trên trái)
-                strings: {
-                    title: "Cho tôi biết tôi đang ở đâu" // Chú thích khi rê chuột vào
-                },
-                locateOptions: {
-                    enableHighAccuracy: true // Cố gắng lấy vị trí chính xác nhất (GPS)
-                }
-            }).addTo(map);
-
-            // Thêm Tile Layer (OpenStreetMap)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
-                attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+                attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // Gọi API để lấy dữ liệu tọa độ từ Django
-            // ... (Phần khởi tạo map và tileLayer giữ nguyên) ...
+            // Nút định vị
+            L.control.locate({ position: 'topleft', strings: { title: "Vị trí của tôi" } }).addTo(map);
 
-    // 1. Tạo một nhóm Cluster (Thay đổi quan trọng)
-    var markers = L.markerClusterGroup();
-
-    // Gọi API để lấy dữ liệu tọa độ từ Django
-    fetch('/api/locations/')
-        .then(response => response.json())
-        .then(data => {
-            if (data.length === 0) {
-                console.warn("API trả về dữ liệu rỗng.");
-            }
-            data.forEach(diadiem => {
-                // Đảm bảo tọa độ là số
-                const lat = parseFloat(diadiem.vido);
-                const lng = parseFloat(diadiem.kinhdo);
-
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    const imageUrl = diadiem.hinh_anh_dai_dien ? diadiem.hinh_anh_dai_dien : '';
-                    
-                    const popupContent = `
-                        <h4>${diadiem.ten}</h4>
-                        <p><b>Phân loại:</b> ${diadiem.loai}</p>
-                        ${imageUrl ? `<img src="${imageUrl}" class="popup-image">` : ''}<br>
-                        <a href="/diadiem/${diadiem.id}">Xem chi tiết</a>
-                    `;
-                    
-                    // 2. Tạo marker nhưng KHÔNG thêm trực tiếp vào map (Bỏ .addTo(map))
-                    var marker = L.marker([lat, lng]).bindPopup(popupContent);
-
-                    // 3. Thêm marker vào nhóm Cluster
-                    markers.addLayer(marker);
-                }
-            });
-
-            // 4. Cuối cùng, thêm nhóm Cluster vào bản đồ
+            // 2. Khởi tạo Cluster Group
+            var markers = L.markerClusterGroup();
             map.addLayer(markers);
-        })
-        .catch(error => console.error('Lỗi khi tải dữ liệu địa điểm:', error));
+
+            // Biến lưu trữ toàn bộ dữ liệu tải về
+            var allData = [];
+
+            // 3. Hàm Lọc và Hiển thị Marker
+            function filterAndShowMarkers() {
+                // Xóa marker cũ
+                markers.clearLayers();
+
+                // Lấy giá trị từ ô nhập
+                var searchText = document.getElementById('search-input').value.toLowerCase();
+                var selectedType = document.getElementById('type-filter').value;
+                var count = 0;
+
+                allData.forEach(diadiem => {
+                    // Điều kiện lọc
+                    var matchName = diadiem.ten.toLowerCase().includes(searchText);
+                    var matchType = (selectedType === 'all') || (diadiem.loai === selectedType);
+
+                    // Nếu thỏa mãn cả hai
+                    if (matchName && matchType && diadiem.vido && diadiem.kinhdo) {
+                        const lat = parseFloat(diadiem.vido);
+                        const lng = parseFloat(diadiem.kinhdo);
+
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const imageUrl = diadiem.hinh_anh_dai_dien ? diadiem.hinh_anh_dai_dien : '';
+                            
+                            // Xác định tên loại đầy đủ để hiển thị
+                            let tenLoai = diadiem.loai;
+                            if(diadiem.loai === 'LS') tenLoai = 'Lịch Sử';
+                            if(diadiem.loai === 'VH') tenLoai = 'Văn Hóa';
+                            if(diadiem.loai === 'TN') tenLoai = 'Thiên Nhiên';
+
+                            const popupContent = `
+                                <div class="popup-content">
+                                    <h4>${diadiem.ten}</h4>
+                                    <p><b>Phân loại:</b> ${tenLoai}</p>
+                                    ${imageUrl ? `<img src="${imageUrl}" class="popup-image">` : ''}
+                                    <br><br>
+                                    <a href="/diadiem/${diadiem.id}" style="display:block; text-align:center; font-weight:bold;">Xem chi tiết</a>
+                                </div>
+                            `;
+                            
+                            var marker = L.marker([lat, lng]).bindPopup(popupContent);
+                            markers.addLayer(marker);
+                            count++;
+                        }
+                    }
+                });
+                
+                // Cập nhật số lượng tìm thấy
+                document.getElementById('count-result').innerText = count;
+            }
+
+            // 4. Gọi API lấy dữ liệu
+            fetch('/api/locations/')
+                .then(response => response.json())
+                .then(data => {
+                    allData = data; // Lưu dữ liệu vào biến toàn cục
+                    filterAndShowMarkers(); // Hiển thị ban đầu (tất cả)
+                })
+                .catch(error => console.error('Lỗi:', error));
+
+            // 5. Gắn sự kiện cho ô tìm kiếm và bộ lọc (Khi gõ hoặc chọn -> Lọc ngay)
+            document.getElementById('search-input').addEventListener('input', filterAndShowMarkers);
+            document.getElementById('type-filter').addEventListener('change', filterAndShowMarkers);
+
         }); 
     </script>
 </body>
