@@ -15,9 +15,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Đọc SECRET_KEY từ biến môi trường (an toàn hơn)
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-j6%i9e*s_0(f=e2g1g5(x+7y51h^1k2k52j*6j4l6h3e')
 
-# Đọc DEBUG từ biến môi trường. Mặc định là False khi deploy.
-DEBUG = config('DEBUG', default=True, cast=bool)
-# NHỚ ĐỔI THÀNH FALSE
+# Đọc DEBUG từ biến môi trường. Mặc định là False khi deploy; True khi trên PC
+# --- CẤU HÌNH DEBUG TỰ ĐỘNG ---
+# Kiểm tra xem có đang chạy trên Render không?
+if 'RENDER' in os.environ:
+    # Đang trên Render -> Bắt buộc tắt Debug để bảo mật
+    DEBUG = False
+    print("--- MÔI TRƯỜNG: PRODUCTION (Render) ---")
+else:
+    # Không có biến RENDER -> Đang ở máy tính cá nhân -> Bật Debug
+    DEBUG = True
+    print("--- MÔI TRƯỜNG: LOCAL (Development) ---")
 
 if DEBUG:
     ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']
