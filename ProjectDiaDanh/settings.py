@@ -16,15 +16,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-j6%i9e*s_0(f=e2g1g5(x+7y51h^1k2k52j*6j4l6h3e')
 
 # Đọc DEBUG từ biến môi trường. Mặc định là False khi deploy.
-DEBUG = config('DEBUG', default=False, cast=bool) 
-
-# Cấu hình ALLOWED_HOSTS cho môi trường Production (Render)
-# ProjectDiaDanh/settings.py
-
-# ... (Tìm và sửa khối này) ...
-
-# Đọc DEBUG từ biến môi trường. Mặc định là False khi deploy.
-DEBUG = config('DEBUG', default=False, cast=bool) 
+DEBUG = config('DEBUG', default=True, cast=bool)
+# NHỚ ĐỔI THÀNH FALSE
 
 if DEBUG:
     ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']
