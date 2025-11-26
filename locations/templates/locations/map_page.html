@@ -11,6 +11,11 @@
        
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
        crossorigin=""></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
        
     <style>
         body {
@@ -70,33 +75,45 @@
             }).addTo(map);
 
             // Gọi API để lấy dữ liệu tọa độ từ Django
-            fetch('/api/locations/')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        console.warn("API trả về dữ liệu rỗng. Không có địa điểm nào để hiển thị.");
-                    }
-                    data.forEach(diadiem => {
-                        if (diadiem.vido && diadiem.kinhdo) {
-                            
-                            const imageUrl = diadiem.hinh_anh_dai_dien ? diadiem.hinh_anh_dai_dien : '';
-                            
-                            // Xây dựng nội dung Popup
-                            const popupContent = `
-                                <h4>${diadiem.ten}</h4>
-                                <p><b>Phân loại:</b> ${diadiem.loai}</p>
-                                ${imageUrl ? `<img src="${imageUrl}" class="popup-image">` : ''}<br>
-                                <a href="/diadiem/${diadiem.id}">Xem chi tiết</a>
-                            `;
-                            
-                            // Thêm Marker (đánh dấu)
-                            L.marker([diadiem.vido, diadiem.kinhdo])
-                                .addTo(map)
-                                .bindPopup(popupContent);
-                        }
-                    });
-                })
-                .catch(error => console.error('Lỗi khi tải dữ liệu địa điểm:', error));
+            // ... (Phần khởi tạo map và tileLayer giữ nguyên) ...
+
+    // 1. Tạo một nhóm Cluster (Thay đổi quan trọng)
+    var markers = L.markerClusterGroup();
+
+    // Gọi API để lấy dữ liệu tọa độ từ Django
+    fetch('/api/locations/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                console.warn("API trả về dữ liệu rỗng.");
+            }
+            data.forEach(diadiem => {
+                // Đảm bảo tọa độ là số
+                const lat = parseFloat(diadiem.vido);
+                const lng = parseFloat(diadiem.kinhdo);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const imageUrl = diadiem.hinh_anh_dai_dien ? diadiem.hinh_anh_dai_dien : '';
+                    
+                    const popupContent = `
+                        <h4>${diadiem.ten}</h4>
+                        <p><b>Phân loại:</b> ${diadiem.loai}</p>
+                        ${imageUrl ? `<img src="${imageUrl}" class="popup-image">` : ''}<br>
+                        <a href="/diadiem/${diadiem.id}">Xem chi tiết</a>
+                    `;
+                    
+                    // 2. Tạo marker nhưng KHÔNG thêm trực tiếp vào map (Bỏ .addTo(map))
+                    var marker = L.marker([lat, lng]).bindPopup(popupContent);
+
+                    // 3. Thêm marker vào nhóm Cluster
+                    markers.addLayer(marker);
+                }
+            });
+
+            // 4. Cuối cùng, thêm nhóm Cluster vào bản đồ
+            map.addLayer(markers);
+        })
+        .catch(error => console.error('Lỗi khi tải dữ liệu địa điểm:', error));
         }); 
     </script>
 </body>
