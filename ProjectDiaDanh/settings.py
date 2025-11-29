@@ -191,5 +191,5 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Thêm tên miền chính thức của bạn vào danh sách tin cậy
 # Điều này giúp tránh lỗi 400 (Bad Request) nếu có sự khác biệt nhỏ về header
 CSRF_TRUSTED_ORIGINS = [
-    'https://diadiem.lenamvn.com',
+    'diadiem.lenamvn.com',
 ]
