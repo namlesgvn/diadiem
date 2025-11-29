@@ -1,8 +1,0 @@
-C:\Users\namle\diadiem>python -m venv venv
-venv\Scripts\activate
-pip install django psycopg2-binary pillow
-django-admin startproject ProjectDiaDanh .
-python manage.py startapp locations
-  Cấu hình Cơ bản:
-  Mở file ProjectDiaDanh/settings.py.
-  Thêm locations vào danh sách INSTALLED_APPS.
