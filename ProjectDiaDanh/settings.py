@@ -31,7 +31,7 @@ if DEBUG:
     ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']
 else:
     # --- THAY 'TEN_MIEN_CUA_BAN.com' BẰNG TÊN MIỀN CỦA BẠN ---
-    CUSTOM_DOMAIN = 'lenamvn.com'
+    CUSTOM_DOMAIN = 'diadiem.lenamvn.com'
     
     ALLOWED_HOSTS = [
         config('WEB_HOST', default=''), # Tên miền Render (diadiem-1.onrender.com)
