@@ -177,6 +177,19 @@ STORAGES = {
 
 # Đặt Cloudinary làm nơi lưu trữ mặc định cho MEDIA (files upload)
 # DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
+#-------------------
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ProjectDiaDanh/settings.py
+
+# ... (Thêm vào cuối file hoặc sau phần DATABASES)
+
+# Cấu hình BẮT BUỘC cho các dịch vụ chạy sau Proxy (như Render)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Thêm tên miền chính thức của bạn vào danh sách tin cậy
+# Điều này giúp tránh lỗi 400 (Bad Request) nếu có sự khác biệt nhỏ về header
+CSRF_TRUSTED_ORIGINS = [
+    'https://diadiem.lenamvn.com',
+]
